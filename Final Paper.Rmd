@@ -1,0 +1,30 @@
+---
+title: "Final Paper"
+author: "Zakir Chaudry"
+date: "12/4/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Abstract
+
+
+## Introduction
+
+
+## Data
+
+
+## Analysis
+
+
+## Results
+
+
+## Discussion
+
+
+## References
