@@ -1,19 +1,26 @@
 ---
-title: "Final Paper"
+title: '[INSERT RESULT] If All Eligible Voters Had Voted in the 2019 Canadian Federal
+  Election'
 author: "Zakir Chaudry"
-date: "12/4/2020"
-output: html_document
+date: "12/20/2020"
+output:
+  pdf_document: default
+  html_document: default
+abstract: \noindent In this paper we will be using MRP Modeling on the CES data using
+  the GSS 2017 data as a post-stratification dataset to see what the results of the
+  election would be if everyone had voted. We then relay the results (currently unknown,
+  add later) and discuss the potential implications of these findings, as well as
+  any weaknesses/opportunities for future improvement.
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-
-## Abstract
-
+<br>
+**Keywords**: MRP; 2019 Canadian Federal Election; Eligible Voter; [Winner of Election]
 
 ## Introduction
-
+Elections are one of the most vital events of the modern age - a submission of votes representing the will of the people, allowing members of the population to make major decisions from local, national, and even international scales. The importance of these events cannot be understated as they directly affect our lives, sometimes in small ways, sometimes much more so. As such, it’s incredibly imperative that the “will of the people” mentioned above comes to fruition. In our current voting system, this is what’s highlighted, making the majority of people happy with the result. However, can we really say the will of the people is truly being heard? There are many different issues contradicting this assumption, but perhaps is one of the most impactful is simply the lack of voting. In the 2019 Canadian Federal Election, roughly 66% (Turnout Reference) of Canadians reported voting. This is quite a lot at first glance, but that’s still 34% of people that are not being accounted for. Frankly speaking it’s hard to support the notion that the election was the will of the people given that so many people’s votes weren’t even heard. However, what if this wasn’t the case? What if every single person that could vote did so? What then? Would the result change? Or are the final results truly the will of the people all along. In this report, we will be using MRP (MRP Reference) Modeling to show what could have happened, in aims to answer these questions and go beyond.
 
 ## Data
 
@@ -25,6 +32,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ## Discussion
+
+
+## Appendix (?)
 
 
 ## References
