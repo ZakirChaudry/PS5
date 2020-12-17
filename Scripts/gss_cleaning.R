@@ -38,10 +38,10 @@ library(janitor)
 library(tidyverse)
 
 # Load the data dictionary and the raw data and correct the variable names
-raw_data <- read_csv("AA8YOHWN.csv")
-dict <- read_lines("gss_dict-1.txt", skip = 18) # skip is because of preamble content
+raw_data <- read_csv("Inputs/Raw Data/gss/AA8YOHWN.csv")
+dict <- read_lines("Inputs/Raw Data/gss/gss_dict-1.txt", skip = 18) # skip is because of preamble content
 # Now we need the labels because these are the actual responses that we need
-labels_raw <- read_file("gss_labels-1.txt")
+labels_raw <- read_file("Inputs/Raw Data/gss/gss_labels-1.txt")
 
 
 #### Set-up the dictionary ####
@@ -343,4 +343,25 @@ gss <- gss %>%
     number_total_children_intention=="Don't" ~ as.numeric(NA)
   )) 
 
-write_csv(gss, "gss.csv")
+# Remove people under 18
+
+gss <- gss %>% filter(age >= 18)
+
+gss$age_range <- cut(gss$age, breaks = c(-Inf, 25, 35, 45, 55, 65, 75, Inf),
+                     labels = c("18 to 24","25 to 34","35 to 44",
+                                "45 to 54","55 to 64","65 to 74",
+                                "75 and above"))
+
+gss$education <- as.character(gss$education)
+gss$education[gss$education == "High school diploma or a high school equivalency certificate"] <- "High School" 
+gss$education[gss$education == "Trade certificate or diploma"] <- "Less than Bachelor's Degree" 
+gss$education[gss$education == "College, CEGEP or other non-university certificate or di..."] <-  "Less than Bachelor's Degree"
+gss$education[gss$education == "Bachelor's degree (e.g. B.A., B.Sc., LL.B.)"] <- "Bachelor's Degree" 
+gss$education[gss$education == "Less than high school diploma or its equivalent"] <-"Less than High School"
+gss$education[gss$education == "University certificate or diploma below the bachelor's level"] <-  "Less than Bachelor's Degree"
+gss$education[gss$education == "University certificate, diploma or degree above the bach..."] <- "Above Bachelor's Degree"  
+gss$education[gss$education == "NA"] <- "N/A"
+gss$education <- as.factor(gss$education)
+
+
+write_csv(gss, "Inputs/Cleaned Data/gss.csv")
