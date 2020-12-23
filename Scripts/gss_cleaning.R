@@ -8,10 +8,10 @@
 # So we create a dictionary type dataset that has the variable names and their 
 # possible values. In that we embed some R code that will do a replacement. We 
 # then apply that dataset to the raw dataset. Finally we do all the usual cleaning.
-# to the dataset. You will end up with a dataset called gss.csv.
-# Authors: Rohan Alexander and Sam Caetano
-# Contact: rohan.alexander@utoronto.ca
-# Date: 7 October 2020
+# to the dataset. You will end up with a dataset called gss.csv. 
+# Authors: Zakir Chaudry (Adopted from code by Rohan Alexander and Sam Caetano)
+# Contact: zakir.chaudry@mail.utoronto.ca
+# Date: 22 December 2020
 # License: MIT
 # Pre-reqs: You need to have downloaded the data from the library. To do that: 
   ## 1. Go to: http://www.chass.utoronto.ca/
@@ -27,7 +27,7 @@
   ## 7. Click download
   ## 8. Select CSV data file, data definitions for STATA (gross, but stick with it for now).
   ## 9. Can select all variables by clicking button next to green colored "All". Then continue.
-  ## 10. Create the files, download and save
+  ## 10. Create the files, download and save 
 # Check: 
   ## You WILL need to change the raw data name. Search for .csv - line 41
   ## You may need to adjust the filepaths depending on your system. Search for: read_

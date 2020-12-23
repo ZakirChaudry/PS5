@@ -1,11 +1,10 @@
 ---
-title: '[INSERT RESULT] If All Eligible Voters Had Voted in the 2019 Canadian Federal
+title: 'Liberal Party Could Have Attained Majority If All Eligible Voters Had Voted in the 2019 Canadian Federal
   Election'
 author: "Zakir Chaudry"
-date: "12/20/2020"
+date: "December 22, 2020"
 output:
   pdf_document: default
-  html_document: default
 abstract: \noindent In this paper we will be using MRP Modeling on the CES data using
   the GSS 2017 data as a post-stratification dataset to see what the results of the
   election would be if everyone had voted. We then relay the results (currently unknown,
@@ -18,14 +17,20 @@ knitr::opts_chunk$set(echo = TRUE)
 library(ggplot2)
 library(tidyverse)
 library(dplyr, warn.conflicts = FALSE)
+library(brms)
+library(knitr)
 # Suppress summarise info
 options(dplyr.summarise.inform = FALSE)
 ```
 <br>
-**Keywords**: MRP; 2019 Canadian Federal Election; Eligible Voter; [Winner of Election]
+**Keywords**: MRP; 2019 Canadian Federal Election; Eligible Voter; Liberal Party; Conservative Party
 
 ## Introduction
-Elections are one of the most vital events of the modern age - a submission of votes representing the will of the people, allowing members of the population to make major decisions from local, national, and even international scales. The importance of these events cannot be understated as they directly affect our lives, sometimes in small ways, sometimes much more so. As such, it’s incredibly imperative that the “will of the people” mentioned above comes to fruition. In our current voting system, this is what’s highlighted, making the majority of people happy with the result. However, can we really say the will of the people is truly being heard? There are many different issues contradicting this assumption, but perhaps is one of the most impactful is simply the lack of voting. In the 2019 Canadian Federal Election, roughly 66% (Turnout Reference) of Canadians reported voting. This is quite a lot at first glance, but that’s still 34% of people that are not being accounted for. Frankly speaking it’s hard to support the notion that the election was the will of the people given that so many people’s votes weren’t even heard. However, what if this wasn’t the case? What if every single person that could vote did so? What then? Would the result change? Or are the final results truly the will of the people all along. In this report, we will be using MRP (MRP Reference) Modeling to show what could have happened, in aims to answer these questions and go beyond.
+Elections are one of the most vital events of the modern age - a submission of votes representing the will of the people, allowing members of the population to make major decisions from local, national, and even international scales. The importance of these events cannot be understated as they directly affect our lives, sometimes in small ways, sometimes much more so. As such, it’s incredibly imperative that the “will of the people” mentioned above comes to fruition. In our current voting system, this is what’s highlighted, making the majority of people happy with the result. However, can we really say the will of the people is truly being heard? There are many different issues contradicting this assumption, but perhaps is one of the most impactful is simply the lack of voting. In the 2019 Canadian Federal Election, roughly 66% (Turnout Reference) of Canadians reported voting. This is quite a lot at first glance, but that’s still 34% of people that are not being accounted for. Frankly speaking it’s hard to support the notion that the election was the will of the people given that so many people’s votes weren’t even heard. However, what if this wasn’t the case? What if every single person that could vote did so? What then? Would the result change? Or are the final results truly the will of the people all along?
+
+To approach this problem, we look at 2 datasets: The Canadian Election Survey and the General Social Survey. The CES is a survey enacted on the Canadian population around every election. It helps us to define various characteristics about respondents, but most importantly it shows their political views/who they support. This lends itself well to create a multilinear regression model for a respondent’s political party of choice based on various characteristics, which can be used with our next dataset. The GSS is useful to gather a wide array of information regarding individuals, but more importantly it is a separate dataset with many of the same characterizes/equivalents of the last one. As such, we can apply post-stratification upon it using the previous dataset. This process is known as Multilinear Regression with Post-Stratification or MRP.
+
+In this report, we will be using MRP Modeling to show what could have happened, in aims to answer these questions and go beyond.
 
 ## Data
 ```{r import data, echo=FALSE}
@@ -89,9 +94,8 @@ edu_ranges %>% ggplot(aes(fill=Dataset, y=percent, x=education)) + geom_bar(posi
 
 # Gender
 gss_gender_prop <- gss %>% 
-  group_by(sex) %>% 
-  summarise(percent = 100 * n()/ nrow(gss)) %>%
-  rename(gender = sex)
+  group_by(gender) %>% 
+  summarise(percent = 100 * n()/ nrow(gss)) 
 
 ces_gender_prop <- ces %>%
   group_by(gender) %>%
@@ -105,27 +109,24 @@ gender_ranges %>% ggplot(aes(fill=Dataset, y=percent, x=gender)) + geom_bar(posi
 
 # Province
 gss_province_prop <- gss %>% 
-  group_by(province) %>% 
+  group_by(cps19_province) %>% 
   summarise(percent = 100 * n()/ nrow(gss)) 
 
 ces_province_prop <- ces %>%
   group_by(cps19_province) %>%
-  summarise(percent = 100 * n()/ nrow(ces)) %>%
-  rename(province = cps19_province)
+  summarise(percent = 100 * n()/ nrow(ces))
 
 province_ranges <- rbind(
   within(gss_province_prop, {Dataset <- 'GSS'}), within(ces_province_prop, {Dataset <- 'CES'})
 )
 
-province_ranges %>% ggplot(aes(fill=Dataset, y=percent, x=province)) + geom_bar(position = "dodge", stat = "identity") + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+province_ranges %>% ggplot(aes(fill=Dataset, y=percent, x=cps19_province)) + geom_bar(position = "dodge", stat = "identity") + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 
 ```
 For future reference, the supported party of each respondent, after our cleaning, is outlined below. 
 ```{r CES party}
 ces %>% ggplot(aes(x=cps19_votechoice)) + geom_bar()
 ```
-
-\\
 ## Model
 We used bayesian regression using the brms package (Brms) in R (R). However, we have 6 parties to deal with, which can be hard to deal with given all of our categorical variables. So, we actually created 6 different models, with each one’s independent variable being a vector of binary values, with a value of 1 for the party in question and 0 for the rest.
 
@@ -133,7 +134,7 @@ The formula for each was (Party) ~ age_range + education + gender + province.
 
 ## Model Results
 Our final results were the following:
-```{r models, echo=FALSE}
+```{r models, echo=FALSE, results="asis"}
 Green_model <- readRDS("../Inputs/Models/Green.rds")
 Conservative_model <- readRDS("../Inputs/Models/Conservative.rds")
 Liberal_model <- readRDS("../Inputs/Models/Liberal.rds")
@@ -141,17 +142,20 @@ Peoples_model <- readRDS("../Inputs/Models/Peoples.rds")
 Bloc_model <- readRDS("../Inputs/Models/Bloc.rds")
 NDP_model <- readRDS("../Inputs/Models/NDP.rds")
 
-coef(Green_model)
-summary(Conservative_model)
-summary(Liberal_model)
-summary(Peoples_model)
-summary(Bloc_model)
-summary(NDP_model)
+kable(fixef(Green_model), caption = "Green Party")
+kable(fixef(Conservative_model), caption = "Conservative Party")
+kable(fixef(Liberal_model), caption = "Liberal Party")
+kable(fixef(Peoples_model), caption = "People's Party")
+kable(fixef(Bloc_model), caption = "Bloc Québécois")
+kable(fixef(NDP_model), caption = "NDP")
 ```
+
+The standout issue at first is the Bloc Québécois model, in that the coefficients are all quite small. We'll touch on this more in the discussion section, but this is not necessarily completely unusable. As for the rest of the parties, the error can be a little high for a few coefficients, but overall the models are viable enough for the purposes of our analysis.
+
 ## Post-Stratification Results
 In order to apply the post-stratification, we used the predict function in R using the previous models on the GSS data. Each model generated a likelihood that a particular respondent supported, and ideally would have voted for, the respective party. Subsequently, we assigned the supported party of choice for each respondent by choosing the party with the maximum likelihood based on their characteristics (age, gender, education, and province). 
 
-``` {r post-strat results}
+``` {r post-strat results, echo=FALSE}
 gss %>% ggplot(aes(x = party)) + geom_bar()
 
 gss_party_prop <- gss %>% 
@@ -161,7 +165,7 @@ gss_party_prop <- gss %>%
 ces_party_prop <- ces %>%
   group_by(cps19_votechoice) %>%
   summarise(percent = 100 * n()/ nrow(ces)) %>%
-  rename(party = cps19_votez
+  rename(party = cps19_votechoice)
 
 party_ranges <- rbind(
   within(gss_party_prop, {Dataset <- 'GSS'}), within(ces_party_prop, {Dataset <- 'CES'})
@@ -174,10 +178,22 @@ party_ranges %>% ggplot(aes(fill=Dataset, y=percent, x=party)) + geom_bar(positi
 The key point of note is that with the post-stratification there's a much heavier support for the liberal and conservative parties, and much fewer for everyone else, including no support at all in the case of the People's Party and Bloc Québécois.
 
 ## Discussion
+Acknowledging the elephant in the room, it is abnormal that there is no support for either the People’s Party or Bloc Québécois. After all, there were those respondents who supported them in the CES data. This is also not a surprise for Bloc Québécois given the details of their model. Does this mean these models were flawed? While it is possible the model isn’t as optimal as it could be under ideal circumstances, the results it displays can be explained fairly easily. There are not a lot of people who support either of those parties, especially in regards to the rest. As such, there wasn’t a lot of data to pull from. In addition, the GSS is a smaller dataset, so it makes sense that there would be fewer supporters for these parties. However, a potentially more accurate interpretation of these results is that in our current population, supporters of these two parties are overrepresented in the CES dataset. That’s not to say there are indeed no supporters out there, but seeing as how they had no supporters after applying the post-stratification, it’s definitely plausible.
+
+Before we explore how the results impact the bigger picture, it seems prudent to first explain the limitations of the analysis conducted. It’s hard to ignore the fact that we ignored many respondents given the fact that they didn’t have answers to certain questions, didn’t live in one of the 10 provinces, or were not cisgender. There were not enough people excluded to make the models created unusable, but it’s certainly a downside when the main purpose of this report was to highlight how the results of the election could have been if EVERYONE’s vote had counted, which includes those respondents who were not taken into account during the analysis. There’s also the fact that since there wasn’t as much data for the two parties who had no supporters after the post-stratification, the models generated for them, and likely the NDP and Green Party as well to some extent, may not have been as accurate. That said, we don’t believe these models are without merit and can despite all this help us in our discussion.
+
+Given the models are less than optimal, we will use the results less from a specific number by number basis, but in a more general sense. Shown below are the actual election results (results), in terms of the number of votes each party received. 
+
+``` {r actual election results}
+results <- data.frame(votes=c(1387030, 6239227, 1189607, 6018728, 2903722, 294092), 
+              party=c("Bloc Québécois", "Conservative Party", "Green Party", "Liberal Party", "NDP", "People's Party"))
+
+results %>% ggplot(aes(x=party, y=votes)) + geom_bar(stat = "identity")
 
 
-## Appendix (?)
+```
 
+The major conclusion from our results are that the Conservative Party would have a much smaller percentage of votes than is seen above, mainly replaced by the growth of the Liberal Party.  Given our uncertainty with the other parties, let’s say they remain in somewhat similar standing, perhaps slightly less, the decrease in which would support again the growth of the Liberal Party. That’s somewhat of a big deal. There would be a new party with the majority of votes. However, in terms of seats (positions awarded to the winner of the majority of votes in each riding), which is really what matters when it comes to policy, the liberal party already had the majority. That faces us with the question once again: Would the results have changed if everyone had voted? We would say yes. Even though they already had more seats than any other party, the increase in votes may have given the Liberal Party enough seats to attain a “majority”, which would give them more power than they have at the moment. Furthermore, we would find that the Conservative Party is overrepresented, and would lose power had everyone voted. While this may not seem to be a big shift, every little bit count when it comes to policy, especially when impacting a whole country of people. Thus, highlighted here are not just the hypothetical results of an imaginary situation, but also a message for those who did not vote, specifically those people who support the Liberal Party – Your vote matters, and it’s your duty as an eligible voter to make your voice heard, or else those with views in the minority will have a greater impact on the country than the majority.  
 
 ## References
 Code supporting this analysis can be found at https://github.com/ZakirChaudry/PS5

@@ -1,12 +1,12 @@
 #### Preamble ####
 # Purpose: Prepare and clean the CES online survey data
 # Author: Zakir Chaudry
-# Date: 13 December 2020
+# Date: 22 December 2020
 # Contact: zakir.chaudry@mail.utoronto.ca
 # License: MIT
 # Pre-requisites: 
-# - Need to have downloaded the data from the CES and save the folder that you're 
-# interested in to inputs/raw data 
+# - Need to have downloaded the data from the CES (http://www.ces-eec.ca/) and save the folder that you're 
+# interested in to inputs/raw data
 # - Don't forget to gitignore it!
 
 #### Workspace setup ####
