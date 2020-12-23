@@ -1,17 +1,23 @@
 ---
 title: 'Liberal Party Could Have Attained Majority If All Eligible Voters Had Voted in the 2019 Canadian Federal
-  Election'
+  Election - An Analysis using MRP'
 author: "Zakir Chaudry"
 date: "December 22, 2020"
 output:
-  pdf_document: default
-abstract: \noindent In this paper we will be using MRP Modeling on the CES data using
+  pdf_document:
+        fig_caption: yes
+header-includes:
+  \usepackage{float}
+  \usepackage{caption}
+  \floatplacement{figure}{H}
+bibliography: references.bib
+nocite: '@*'
+abstract: \noindent In this paper we will be using MRP Modeling on the 2019 CES data using
   the GSS 2017 data as a post-stratification dataset to see what the results of the
-  election would be if everyone had voted. We then relay the results (currently unknown,
-  add later) and discuss the potential implications of these findings, as well as
+  election would be if everyone had voted. We then relay the results and discuss the 
+  potential implications of these findings, as well as
   any weaknesses/opportunities for future improvement.
 ---
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(ggplot2)
@@ -19,6 +25,8 @@ library(tidyverse)
 library(dplyr, warn.conflicts = FALSE)
 library(brms)
 library(knitr)
+# Pesky french characters
+options(encoding = 'UTF-8')
 # Suppress summarise info
 options(dplyr.summarise.inform = FALSE)
 ```
@@ -26,7 +34,7 @@ options(dplyr.summarise.inform = FALSE)
 **Keywords**: MRP; 2019 Canadian Federal Election; Eligible Voter; Liberal Party; Conservative Party
 
 ## Introduction
-Elections are one of the most vital events of the modern age - a submission of votes representing the will of the people, allowing members of the population to make major decisions from local, national, and even international scales. The importance of these events cannot be understated as they directly affect our lives, sometimes in small ways, sometimes much more so. As such, it’s incredibly imperative that the “will of the people” mentioned above comes to fruition. In our current voting system, this is what’s highlighted, making the majority of people happy with the result. However, can we really say the will of the people is truly being heard? There are many different issues contradicting this assumption, but perhaps is one of the most impactful is simply the lack of voting. In the 2019 Canadian Federal Election, roughly 66% (Turnout Reference) of Canadians reported voting. This is quite a lot at first glance, but that’s still 34% of people that are not being accounted for. Frankly speaking it’s hard to support the notion that the election was the will of the people given that so many people’s votes weren’t even heard. However, what if this wasn’t the case? What if every single person that could vote did so? What then? Would the result change? Or are the final results truly the will of the people all along?
+Elections are one of the most vital events of the modern age - a submission of votes representing the will of the people, allowing members of the population to make major decisions from local, national, and even international scales. The importance of these events cannot be understated as they directly affect our lives, sometimes in small ways, sometimes much more so. As such, it’s incredibly imperative that the “will of the people” mentioned above comes to fruition. In our current voting system, this is what’s highlighted, making the majority of people happy with the result. However, can we really say the will of the people is truly being heard? There are many different issues contradicting this assumption, but perhaps is one of the most impactful is simply the lack of voting. In the 2019 Canadian Federal Election, roughly 66% of Canadians reported voting @cbcnews_2019. This is quite a lot at first glance, but that’s still 34% of people that are not being accounted for. Frankly speaking it’s hard to support the notion that the election was the will of the people given that so many people’s votes weren’t even heard. However, what if this wasn’t the case? What if every single person that could vote did so? What then? Would the result change? Or are the final results truly the will of the people all along?
 
 To approach this problem, we look at 2 datasets: The Canadian Election Survey and the General Social Survey. The CES is a survey enacted on the Canadian population around every election. It helps us to define various characteristics about respondents, but most importantly it shows their political views/who they support. This lends itself well to create a multilinear regression model for a respondent’s political party of choice based on various characteristics, which can be used with our next dataset. The GSS is useful to gather a wide array of information regarding individuals, but more importantly it is a separate dataset with many of the same characterizes/equivalents of the last one. As such, we can apply post-stratification upon it using the previous dataset. This process is known as Multilinear Regression with Post-Stratification or MRP.
 
@@ -34,12 +42,12 @@ In this report, we will be using MRP Modeling to show what could have happened, 
 
 ## Data
 ```{r import data, echo=FALSE}
+# Read in the data
 ces <- read.csv("../Inputs/Cleaned Data/ces.csv")
 gss <- read.csv("../Inputs/Cleaned Data/gss.csv")
-
 ```
 ### CES Data
-The data used to generate the model was taken from the 2019 Canadian Election Study. The Canadian Election Study is a large-scale survey conducted on each election year, going back to as early as 1965 (CES site). Its purpose is to give a greater insight into the electoral democracy in Canada by measuring many sorts of details. The data for this report was taken from the 2019 Study, in particular the data gathered from the online survey component of the study. The questionnaire for this study was hosted and conducted via the Qualtrics Platform (Qualtrics Platform) (Codebook), with the population being eligible voters in Canada.
+The data used to generate the model was taken from the 2019 Canadian Election Study (@DVN_DUS88V_2020). The Canadian Election Study is a large-scale survey conducted on each election year, going back to as early as 1965 @CESsite. Its purpose is to give a greater insight into the electoral democracy in Canada by measuring many sorts of details. The data for this report was taken from the 2019 Study, in particular the data gathered from the online survey component of the study. The questionnaire for this study was hosted and conducted via the Qualtrics Platform (@DVN_DUS88V_2020), with the population being eligible voters in Canada. The data can be found and cleaned via the steps outlined in “ces_cleaning.R” in the git repository.
 
 We made use of 5 different variables in order to create our model. The independent variable we looked at was cps19_votechoice, which described which party the respondent was going to vote for. There were 8 choices in response: “Green Party”, “Conservative Party”, “Liberal Party”, “People’s Party”, "Bloc Québécois", "ndp", "Another party (please specify)", and "Don't know/ Prefer not to answer". For the model, we ended up removing last two options, as on the grand scale of things, neither of those two groups would impact the election as a whole. As such, we were left with 6 different parties to choose from. There was another option in terms of finding a variable describing the choice of party labeled pes19_votingchoice, which described who the respondents said they voted for after the election. This may have been a better choice in terms of what we wanted from the variable, but there simply was not enough data for this variable for this switch to have been worth it.
 
@@ -47,21 +55,21 @@ The first dependent variable we chose was cps19_age, which described the age of 
 
 The next dependent variable we chose was cps19_education, which described the level of education the respondent had attained up to that point. There was a lot of reshuffling of data values for this variable, mainly due to the fact that the post-stratification dataset’s education had a wildly different set of potential values. The initial values were [Insert Initial Values], but we ended up reorganizing them into the following values: “Less than High School”, “High School”, “Less than Bachelor’s Degree”, “Bachelor’s Degree”, and “Above Bachelor’s Degree”. While some information was lost, the ability to match up with the post-stratification dataset’s education values and the simplicity from an observation standpoint made this a worthy endeavor.
 
-The third dependent variable we chose was cps19_gender, which described the gender of the respondent. Again, there was an issue in terms of matching the post-stratification set, specifically in terms of non-cisgender respondents. The post-stratification set has only male or female options available, as it uses sex rather than gender. Ultimately, we dropped the non-cisgender respondents, as like the voting choices, their impact was negligible relatively speaking (Cis Population).
+The third dependent variable we chose was cps19_gender, which described the gender of the respondent. Again, there was an issue in terms of matching the post-stratification set, specifically in terms of non-cisgender respondents. The post-stratification set has only male or female options available, as it uses sex rather than gender. Ultimately, we dropped the non-cisgender respondents, as like the voting choices, their impact was negligible relatively speaking (@cis).
 
-Finally, our last dependent variable was cps19_province. We found that province was a very important variable as there can be great variation across provinces regarding political choice. Perhaps the largest change was that the post-stratification dataset did not contain data on the Northwest Territories, Nunavut, and Yukon. While this at first may seem like a reason to not use this variable, we found that the province of the respondent to be very important and stripped away the 3 options not found. Similarly, we’re not losing much (Province Population). 
+Finally, our last dependent variable was cps19_province. We found that province was a very important variable as there can be great variation across provinces regarding political choice. Perhaps the largest change was that the post-stratification dataset did not contain data on the Northwest Territories, Nunavut, and Yukon. While this at first may seem like a reason to not use this variable, we found that the province of the respondent to be very important and stripped away the 3 options not found. Similarly, we’re not losing much (@population). 
 
 ### GSS Data
-The data used in this report was curated from the General Social Survey (GSS) program., specifically the results of the “General social survey on Family” from 2017. Unfortunately, we cannot provide the data itself, as it is restricted to only those that are allowed to view it. However, if you are a UofT student or have a UofT login, you can follow the steps outlined in “gss_cleaning-1.R” located in the git repository to acquire and clean the data for use. 
+The data used in this report was curated from the General Social Survey (@GSS) program., specifically the results of the “General social survey on Family” from 2017. Unfortunately, we cannot provide the data itself, as it is restricted to only those that are allowed to view it. However, if you are a UofT student or have a UofT login, you can follow the steps outlined in “gss_cleaning.R” located in the git repository to acquire and clean the data for use. 
 
-As stated in the overview for the GSS, the target population consisted of those aged 15 and over across all the provinces in Canada, apart from full-time residents of institutions. For this survey, the sample size was approximately 20,000 people, done via Stratified Random Sampling, where the strata were geographic areas within each province. The frame consisted of two aspects: the list of telephone numbers in use available to Statistics Canada and the list of all dwellings within the ten provinces.
+As stated in the overview for the GSS (@gss_overview), the target population consisted of those aged 15 and over across all the provinces in Canada, apart from full-time residents of institutions. For this survey, the sample size was approximately 20,000 people, done via Stratified Random Sampling, where the strata were geographic areas within each province. The frame consisted of two aspects: the list of telephone numbers in use available to Statistics Canada and the list of all dwellings within the ten provinces.
 
 Respondents were contacted via computer assisted telephone interviews. There were many measures for combating non-response. One of which was the resilience shown by the interviewers, including calling up to twice more to a respondent who initially refused, outlining the importance of the survey. In addition, numerous calls were made to those that didn’t pick up. In addition, when dealing with actual non-response, it was not permitted for questions that required weighting. Furthermore, the non-response adjusted accordingly depending on the level of information available.
 
 The dependent variables were the same as from the CES data, with the variable names being age, education, sex, and province. Age and education were the only two variables that had to have refactoring. Age was split into age ranges exactly as before. Education again was a struggle to work through, but was transformed into the same list of values: “Less than High School”, “High School”, “Less than Bachelor’s Degree”, “Bachelor’s Degree”, and “Above Bachelor’s Degree”.
 
-```{r plots, echo=FALSE, warning=FALSE}
-# Age Range Plots
+```{r plots, echo=FALSE, warning=FALSE, fig.width=7,fig.height=6,fig.cap="Distribution of Ages of CES and GSS Respondents."}
+# Create combined age ranges for comparison
 ces_age_prop <- ces %>% 
   group_by(age_range) %>% 
   summarise(percent = 100 * n()/ nrow(ces))
@@ -74,10 +82,14 @@ age_ranges <- rbind(
   within(gss_age_prop, {Dataset <- 'GSS'}), within(ces_age_prop, {Dataset <- 'CES'})
 )
 
-age_ranges %>% ggplot(aes(fill=Dataset, y=percent, x=age_range)) + geom_bar(position = "dodge", stat = "identity")
+# Explicitly choosing to leave title out as it would just repeat the figure caption, not forgetting
+age_ranges %>% ggplot(aes(fill=Dataset, y=percent, x=age_range)) + geom_bar(position = "dodge", stat = "identity") +
+  labs(x = "Age Range", y = "Percent") 
+```
 
 
-# Education
+```{r, echo=FALSE, warning=FALSE, fig.width=7,fig.height=6,fig.cap="Distribution of Education Level of CES and GSS Respondents."}
+# Create combined education for comparison
 gss_edu_prop <- gss %>% 
   group_by(education) %>% 
   summarise(percent = 100 * n()/ nrow(gss))
@@ -90,9 +102,12 @@ edu_ranges <- rbind(
   within(gss_edu_prop, {Dataset <- 'GSS'}), within(ces_edu_prop, {Dataset <- 'CES'})
 )
 
-edu_ranges %>% ggplot(aes(fill=Dataset, y=percent, x=education)) + geom_bar(position = "dodge", stat = "identity") + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+edu_ranges %>% ggplot(aes(fill=Dataset, y=percent, x=education)) + geom_bar(position = "dodge", stat = "identity") + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + labs(x = "Education Level", y = "Percent")
+```
 
-# Gender
+
+```{r, echo=FALSE, warning=FALSE, fig.width=7,fig.height=6,fig.cap="Distribution of Gender of CES and GSS Respondents."}
+# Create combined gender for comparison
 gss_gender_prop <- gss %>% 
   group_by(gender) %>% 
   summarise(percent = 100 * n()/ nrow(gss)) 
@@ -105,9 +120,12 @@ gender_ranges <- rbind(
   within(gss_gender_prop, {Dataset <- 'GSS'}), within(ces_gender_prop, {Dataset <- 'CES'})
 )
 
-gender_ranges %>% ggplot(aes(fill=Dataset, y=percent, x=gender)) + geom_bar(position = "dodge", stat = "identity") + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+gender_ranges %>% ggplot(aes(fill=Dataset, y=percent, x=gender)) + geom_bar(position = "dodge", stat = "identity") + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + labs(x = "Gender", y = "Percent")
+```
 
-# Province
+
+```{r, echo=FALSE, warning=FALSE, fig.width=7,fig.height=6,fig.cap="Distribution of Province of CES and GSS Respondents."}
+# Create combined province for comparison
 gss_province_prop <- gss %>% 
   group_by(cps19_province) %>% 
   summarise(percent = 100 * n()/ nrow(gss)) 
@@ -120,28 +138,36 @@ province_ranges <- rbind(
   within(gss_province_prop, {Dataset <- 'GSS'}), within(ces_province_prop, {Dataset <- 'CES'})
 )
 
-province_ranges %>% ggplot(aes(fill=Dataset, y=percent, x=cps19_province)) + geom_bar(position = "dodge", stat = "identity") + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+province_ranges %>% ggplot(aes(fill=Dataset, y=percent, x=cps19_province)) + geom_bar(position = "dodge", stat = "identity") + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + labs(x = "Province", y = "Percent")
 
 ```
+
+
 For future reference, the supported party of each respondent, after our cleaning, is outlined below. 
-```{r CES party}
-ces %>% ggplot(aes(x=cps19_votechoice)) + geom_bar()
-```
-## Model
-We used bayesian regression using the brms package (Brms) in R (R). However, we have 6 parties to deal with, which can be hard to deal with given all of our categorical variables. So, we actually created 6 different models, with each one’s independent variable being a vector of binary values, with a value of 1 for the party in question and 0 for the rest.
 
-The formula for each was (Party) ~ age_range + education + gender + province.
+
+```{r CES party, echo=FALSE, fig.width=7,fig.height=6,fig.cap="Distribution of Party Choice of CES Respondents."}
+ces$cps19_votechoice <- as.character(ces$cps19_votechoice)
+ces %>% ggplot(aes(x=cps19_votechoice)) + geom_bar() + labs(x = "Party", y = "Percent") + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+```
+
+
+## Model
+We used bayesian regression using the brms package (@brms) in R (@citeR). However, we have 6 parties to deal with, which can be hard to deal with given all of our categorical variables. So, we actually created 6 different models, with each one’s independent variable being a vector of binary values, with a value of 1 for the party in question and 0 for the rest.
+
+The formula for each was $(Party) = \beta_1* age\_range + \beta_2* education +\beta_3* gender + \beta_4* province$.
 
 ## Model Results
 Our final results were the following:
 ```{r models, echo=FALSE, results="asis"}
+# Load pre-created models (see "create_models.R" for more details)
 Green_model <- readRDS("../Inputs/Models/Green.rds")
 Conservative_model <- readRDS("../Inputs/Models/Conservative.rds")
 Liberal_model <- readRDS("../Inputs/Models/Liberal.rds")
 Peoples_model <- readRDS("../Inputs/Models/Peoples.rds")
 Bloc_model <- readRDS("../Inputs/Models/Bloc.rds")
 NDP_model <- readRDS("../Inputs/Models/NDP.rds")
-
+# Display in table form the estimates and errors for each model
 kable(fixef(Green_model), caption = "Green Party")
 kable(fixef(Conservative_model), caption = "Conservative Party")
 kable(fixef(Liberal_model), caption = "Liberal Party")
@@ -155,9 +181,13 @@ The standout issue at first is the Bloc Québécois model, in that the coefficie
 ## Post-Stratification Results
 In order to apply the post-stratification, we used the predict function in R using the previous models on the GSS data. Each model generated a likelihood that a particular respondent supported, and ideally would have voted for, the respective party. Subsequently, we assigned the supported party of choice for each respondent by choosing the party with the maximum likelihood based on their characteristics (age, gender, education, and province). 
 
-``` {r post-strat results, echo=FALSE}
-gss %>% ggplot(aes(x = party)) + geom_bar()
 
+``` {r post-strat results, echo=FALSE, fig.width=7,fig.height=6,fig.cap="Modeled Distribution of Party Choice of GSS Respondents."}
+gss %>% ggplot(aes(x = party)) + geom_bar() + labs(x = "Party", y = "Percent") + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+```
+
+
+``` {r post-strat results2, echo=FALSE, fig.width=7,fig.height=6,fig.cap="Modeled Distribution of Party Choice of respondents."}
 gss_party_prop <- gss %>% 
   group_by(party) %>% 
   summarise(percent = 100 * n()/ nrow(gss)) 
@@ -171,10 +201,11 @@ party_ranges <- rbind(
   within(gss_party_prop, {Dataset <- 'GSS'}), within(ces_party_prop, {Dataset <- 'CES'})
 )
 
-party_ranges %>% ggplot(aes(fill=Dataset, y=percent, x=party)) + geom_bar(position = "dodge", stat = "identity") + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
-
+party_ranges %>% ggplot(aes(fill=Dataset, y=percent, x=party)) + geom_bar(position = "dodge", stat = "identity") + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + labs(x = "Party", y = "Percent")
 
 ```
+
+
 The key point of note is that with the post-stratification there's a much heavier support for the liberal and conservative parties, and much fewer for everyone else, including no support at all in the case of the People's Party and Bloc Québécois.
 
 ## Discussion
@@ -182,13 +213,13 @@ Acknowledging the elephant in the room, it is abnormal that there is no support 
 
 Before we explore how the results impact the bigger picture, it seems prudent to first explain the limitations of the analysis conducted. It’s hard to ignore the fact that we ignored many respondents given the fact that they didn’t have answers to certain questions, didn’t live in one of the 10 provinces, or were not cisgender. There were not enough people excluded to make the models created unusable, but it’s certainly a downside when the main purpose of this report was to highlight how the results of the election could have been if EVERYONE’s vote had counted, which includes those respondents who were not taken into account during the analysis. There’s also the fact that since there wasn’t as much data for the two parties who had no supporters after the post-stratification, the models generated for them, and likely the NDP and Green Party as well to some extent, may not have been as accurate. That said, we don’t believe these models are without merit and can despite all this help us in our discussion.
 
-Given the models are less than optimal, we will use the results less from a specific number by number basis, but in a more general sense. Shown below are the actual election results (results), in terms of the number of votes each party received. 
+Given the models are less than optimal, we will use the results less from a specific number by number basis, but in a more general sense. Shown below are the actual election results (@results), in terms of the number of votes each party received. 
 
-``` {r actual election results}
+``` {r actual election results, echo=FALSE, fig.width=7,fig.height=6,fig.cap="Results of the 2019 Canadian Federal Election"}
 results <- data.frame(votes=c(1387030, 6239227, 1189607, 6018728, 2903722, 294092), 
               party=c("Bloc Québécois", "Conservative Party", "Green Party", "Liberal Party", "NDP", "People's Party"))
 
-results %>% ggplot(aes(x=party, y=votes)) + geom_bar(stat = "identity")
+results %>% ggplot(aes(x=party, y=votes)) + geom_bar(stat = "identity") + labs(x = "Party", y = "Number of Votes") + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 
 ```
 

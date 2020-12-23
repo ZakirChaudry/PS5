@@ -1,4 +1,4 @@
-This repository contains code and data supporting the analysis outlined in 'Liberal Party Could Have Attained Majority If All Eligible Voters Had Voted in the 2019 Canadian Federal Election'. 
+This repository contains code and data supporting the analysis outlined in 'Liberal Party Could Have Attained Majority If All Eligible Voters Had Voted in the 2019 Canadian Federal Election - An Analysis using MRP'. 
 
 The two datasets are either too large or too private to share via the repository, but instructions have been outlined in each respective cleaning script, located in the scripts folder.
 
