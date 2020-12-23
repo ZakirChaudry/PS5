@@ -1,0 +1,1 @@
+This repository contains code and data supporting the analysis outlined in 'Liberal Party Could Have Attained Majority If All Eligible Voters Had Voted in the 2019 Canadian Federal Election'. 
