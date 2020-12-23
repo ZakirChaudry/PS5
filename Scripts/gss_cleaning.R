@@ -36,6 +36,7 @@
 #### Workspace set-up ####
 library(janitor)
 library(tidyverse)
+library(dplyr)
 
 # Load the data dictionary and the raw data and correct the variable names
 raw_data <- read_csv("Inputs/Raw Data/gss/AA8YOHWN.csv")
@@ -363,5 +364,13 @@ gss$education[gss$education == "University certificate, diploma or degree above 
 gss$education[gss$education == "NA"] <- "N/A"
 gss$education <- as.factor(gss$education)
 
+gss <- gss %>% filter(education != "N/A")
+gss$gender <- gss$sex
+gss$cps19_province <- gss$province
+
+gss <- gss %>% select(age_range,
+                      gender,
+                      cps19_province,
+                      education)
 
 write_csv(gss, "Inputs/Cleaned Data/gss.csv")

@@ -31,8 +31,6 @@ NDP_model <- brm(NDP ~ age_range + education + gender + cps19_province,
                    data = ces,
                    family = bernoulli())
 
-prior <- prior(normal(0,1))
-
 
 saveRDS(Green_model, file = "Inputs/Models/Green.rds")
 saveRDS(Conservative_model, file = "Inputs/Models/Conservative.rds")

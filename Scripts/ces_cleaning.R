@@ -93,7 +93,8 @@ ces$NDP[ces$cps19_votechoice == "ndp"] = 1
 ces$NDP[ces$cps19_votechoice != "ndp"] = 0
 ces$NDP <- as.numeric(ces$NDP)
 
-ces <- ces %>% select(age_range,
+ces <- ces %>% select(cps19_votechoice,
+                      age_range,
                       education,
                       gender,
                       cps19_province,
