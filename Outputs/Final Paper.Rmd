@@ -120,29 +120,58 @@ province_ranges <- rbind(
 province_ranges %>% ggplot(aes(fill=Dataset, y=percent, x=province)) + geom_bar(position = "dodge", stat = "identity") + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 
 ```
+For future reference, the supported party of each respondent, after our cleaning, is outlined below. 
+```{r CES party}
+ces %>% ggplot(aes(x=cps19_votechoice)) + geom_bar()
+```
+
 \\
 ## Model
 We used bayesian regression using the brms package (Brms) in R (R). However, we have 6 parties to deal with, which can be hard to deal with given all of our categorical variables. So, we actually created 6 different models, with each one’s independent variable being a vector of binary values, with a value of 1 for the party in question and 0 for the rest.
 
 The formula for each was (Party) ~ age_range + education + gender + province.
 
-## Results
+## Model Results
 Our final results were the following:
 ```{r models, echo=FALSE}
 Green_model <- readRDS("../Inputs/Models/Green.rds")
 Conservative_model <- readRDS("../Inputs/Models/Conservative.rds")
 Liberal_model <- readRDS("../Inputs/Models/Liberal.rds")
 Peoples_model <- readRDS("../Inputs/Models/Peoples.rds")
-#Bloc_model <- readRDS("../Inputs/Models/Bloc.rds")
+Bloc_model <- readRDS("../Inputs/Models/Bloc.rds")
 NDP_model <- readRDS("../Inputs/Models/NDP.rds")
 
-summary(Green_model)
+coef(Green_model)
 summary(Conservative_model)
 summary(Liberal_model)
 summary(Peoples_model)
-#summary(Bloc_model)
+summary(Bloc_model)
 summary(NDP_model)
 ```
+## Post-Stratification Results
+In order to apply the post-stratification, we used the predict function in R using the previous models on the GSS data. Each model generated a likelihood that a particular respondent supported, and ideally would have voted for, the respective party. Subsequently, we assigned the supported party of choice for each respondent by choosing the party with the maximum likelihood based on their characteristics (age, gender, education, and province). 
+
+``` {r post-strat results}
+gss %>% ggplot(aes(x = party)) + geom_bar()
+
+gss_party_prop <- gss %>% 
+  group_by(party) %>% 
+  summarise(percent = 100 * n()/ nrow(gss)) 
+
+ces_party_prop <- ces %>%
+  group_by(cps19_votechoice) %>%
+  summarise(percent = 100 * n()/ nrow(ces)) %>%
+  rename(party = cps19_votez
+
+party_ranges <- rbind(
+  within(gss_party_prop, {Dataset <- 'GSS'}), within(ces_party_prop, {Dataset <- 'CES'})
+)
+
+party_ranges %>% ggplot(aes(fill=Dataset, y=percent, x=party)) + geom_bar(position = "dodge", stat = "identity") + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+
+
+```
+The key point of note is that with the post-stratification there's a much heavier support for the liberal and conservative parties, and much fewer for everyone else, including no support at all in the case of the People's Party and Bloc Québécois.
 
 ## Discussion
 
@@ -151,3 +180,4 @@ summary(NDP_model)
 
 
 ## References
+Code supporting this analysis can be found at https://github.com/ZakirChaudry/PS5
