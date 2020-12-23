@@ -19,7 +19,7 @@ Peoples <- Peoples_model %>% predict(newdata = gss)
 Bloc <- Bloc_model %>% predict(newdata = gss)
 NDP <- NDP_model %>% predict(newdata = gss)
 
-parties <- c("Green Party", "Conservative Party", "Liberal Party", "People's Party", "Bloc Québécois", "ndp")
+parties <- c("Green Party", "Conservative Party", "Liberal Party", "People's Party", "Bloc Québécois", "NDP")
 predictions <- data.frame(green[,1], conservative[,1], Liberal[,1], Peoples[,1], Bloc[,1], NDP[,1])
 
 for (num_row in 1:nrow(gss)) {

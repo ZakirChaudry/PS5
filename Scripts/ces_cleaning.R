@@ -5,14 +5,13 @@
 # Contact: zakir.chaudry@mail.utoronto.ca
 # License: MIT
 # Pre-requisites: 
-# - Need to have downloaded the data from the CES (http://www.ces-eec.ca/) and save the folder that you're 
-# interested in to inputs/raw data
-# - Don't forget to gitignore it!
+# - Need to have downloaded the 2019 data from the CES (http://www.ces-eec.ca/) and save the online survey data to inputs/raw data 
+# - Don't forget to gitignore it, the file is too large to go on git.
 
 #### Workspace setup ####
 library(haven)
 library(tidyverse)
-# Read in the raw data (You might need to change this if you use a different dataset)
+# Read in the raw data (You might need to change this based on how you saved)
 raw_data <- read_dta("Inputs/Raw Data/dataverse_files/2019 Canadian Election Study - Online Survey v1.0.dta")
 # Add the labels
 ces <- labelled::to_factor(raw_data)
@@ -58,6 +57,8 @@ ces <- ces %>% filter(cps19_province != "Yukon",
 
 ces <- ces %>% filter(ces$cps19_votechoice != "Another party (please specify)", 
                       ces$cps19_votechoice != "Don't know/ Prefer not to answer")
+
+ces$cps19_votechoice[ces$cps19_votechoice == "ndp"] <- "NDP"
 
 ces$cps19_votechoice <- as.character(ces$cps19_votechoice)
 ces$Green <- NA
